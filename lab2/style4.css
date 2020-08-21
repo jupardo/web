@@ -1,0 +1,15 @@
+input[type=text] {
+    width: 150px;
+    margin-bottom: 10px;
+    background: greenyellow;
+}
+
+label[for=visitante] {
+    color: orangered;
+    font-weight: bolder;
+    font-size: large;
+}
+
+button {
+    border-radius: 15px;
+}
