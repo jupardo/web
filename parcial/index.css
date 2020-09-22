@@ -1,0 +1,30 @@
+.logo {
+    font-family: 'Satisfy', sans-serif;
+    font-size: 24px;
+    color: black;
+    
+}
+
+.logo:hover {
+    text-decoration: none;
+    color: black;
+    cursor: pointer;
+}
+
+.banner img {
+    max-width: 100%;
+    min-width: 95%;
+}
+
+.carrito img {
+    width: 24px;
+}
+
+.carrito span {
+    vertical-align: middle;
+    font-size: 0.75rem;
+}
+
+.carrito {
+    cursor: pointer;
+}
