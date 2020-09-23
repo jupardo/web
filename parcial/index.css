@@ -16,15 +16,28 @@
     min-width: 95%;
 }
 
-.carrito img {
+.carrito-btn img {
     width: 24px;
 }
 
-.carrito span {
+.carrito-btn span {
     vertical-align: middle;
     font-size: 0.75rem;
 }
 
-.carrito {
+#carrito {
+    display: none;
+}
+
+#cards {
+    display: none;
+}
+
+.no-border {
+    background: white;
+    border: 0px;
+}
+
+.carrito-btn {
     cursor: pointer;
 }

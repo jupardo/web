@@ -28,7 +28,7 @@
         <a class="navbar-nav logo" href="">Restaurant & Lounge</a>
         <ul class="navbar-nav">
           <li class="navbar-nav mr-auto"></li>
-          <li class="navbar-item carrito">
+          <li class="navbar-item carrito-btn" id="carrito-btn">
             <img src="https://i.imgur.com/1EKrQIi.png" alt="carrito compras" />
             <span id="carrito-count">0 items</span>
           </li>
@@ -42,33 +42,25 @@
     </section>
     <section id="navbar">
       <div class="container mt-3">
-        <nav class="navbar navbar-dark bg-dark">
-          <ul class="navbar-nav">
-            <li class="nav-item active">
-              <a class="nav-link" href="#">Burguers <span class="sr-only">(current)</span></a>
-            </li>
-          </ul>
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#cat-navbar"
+            aria-controls="cat-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="cat-navbar">
+            <ul class="navbar-nav mr-auto" id="categories">
+            </ul>
+          </div>
         </nav>
       </div>
     </section>
     <section id="content">
       <div class="container mt-3 py-3 border-top border-bottom">
-        <h3 id="category-title" class="text-center">Burgers</h3>
+        <h3 id="category-title" class="text-center">Please select a category</h3>
       </div>
       <div class="container mt-3">
-        <div class="row" id="cards">
-          <div class="col-lg-3 col-md-4 col-sm-6 col-12">
-            <div class="card">
-              <img src="..." class="card-img-top" alt="...">
-              <div class="card-body">
-                <h5 class="card-title"></h5>
-                <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. In repellat saepe recusandae autem aperiam incidunt, suscipit a iste nihil deserunt inventore dignissimos rerum quae tenetur magni accusantium molestias rem voluptatem!</p>
-                <button class="btn btn-dark">Add to cart</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row" id="carrito">
+        <div class="row" id="cards"></div>
+        <div id="carrito">
           <table class="table table-striped">
             <thead>
               <tr>
@@ -79,7 +71,37 @@
                 <th scope="col">Amount</th>
               </tr>
             </thead>
+            <tbody id="cart-items">
+            </tbody>
           </table>
+          <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="mr-auto"></div>
+            <div class="btn-group" role="group" aria-label="First group">
+              <button class="btn btn-danger" data-toggle="modal" data-target="#confirmModal" id="cart-cancel-btn">Cancel</button>
+            </div>
+            <div class="btn-group ml-2" role="group" aria-label="First group">
+              <button class="btn btn-primary" id="cart-confirm-btn">Confirm order</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Cancel the order</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure about cancelling the order?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" id="cancel-order" data-dismiss="modal" class="btn btn-danger">Yes, I want to cancel the order</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I want to continue adding products</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -87,6 +109,110 @@
   <footer>
     <p class="text-center mt-3 disabled">Contact us: +57 3102105253 - info@restaurant.com - @restaurant</p>
   </footer>
+  <script>
+
+    let products = [];
+
+    let count = 0;
+
+    getData().then(data => {
+      renderNavbar(data);
+      document.getElementById('carrito-btn').addEventListener('click', handleCartIconClick);
+      document.getElementById('cart-confirm-btn')
+        .addEventListener('click', () => console.log(products));
+
+      document.getElementById('cancel-order').addEventListener('click', () => {
+        products = [];
+        count = 0;
+        document.getElementById('carrito-count').innerText = `${count} items`;
+        let tableHtml = products.reduce((accum, actual) => accum + renderProductRow(actual), '');
+        document.getElementById('cart-items').innerHTML = tableHtml;
+      });
+        
+    });
+
+
+
+    function renderNavbar(data) {
+      let html = data.reduce((accum, current) => accum + `<li class="nav-item">
+              <a id="nav-${current.name}" class="nav-link" href="#">${current.name}</a>
+            </li>`, '');
+      document.getElementById('categories').innerHTML = html;
+      data.forEach(category => {
+        document.getElementById(`nav-${category.name}`).addEventListener('click', (event) =>
+          handleCategoryClick(event, category));
+      });
+
+    }
+
+    function handleCategoryClick(event, category) {
+      document.getElementById('category-title').innerText = category.name;
+      document.getElementById('cards').style.display = 'flex';
+      document.getElementById('carrito').style.display = 'none';
+      let cardsHtml = category.products.reduce((accum, actual) => accum + renderCard(actual), '')
+      document.getElementById('cards').innerHTML = cardsHtml;
+      category.products.forEach(product => {
+        document.getElementById(`product-${product.name}`).addEventListener('click', (event) =>
+          handleProductClick(product));
+      });
+
+    }
+
+    function handleProductClick(product) {
+      count++;
+      if(count === 1) {
+        document.getElementById('carrito-count').innerText = `${count} item`;
+      } else {
+        document.getElementById('carrito-count').innerText = `${count} items`;
+      }
+      
+      let item = products.find(prod => prod.name === product.name);
+      if(item) {
+        item.count++;
+      } else {
+        item = product;
+        item.count = 1;
+        item.index = products.length + 1;
+        products.push(item);
+      }
+    }
+
+    function renderCard(product) {
+      return `<div class="col-lg-3 col-md-4 col-sm-6 col-12 mt-3">
+            <div class="card h-100">
+              <img src="${product.image}" class="card-img-top" alt="${product.name}">
+              <div class="card-body">
+                <h5 class="card-title">${product.name}</h5>
+                <p class="card-text">${product.description}</p>
+              </div>
+              <div class="card-footer no-border">
+                <p class="card-text"><b>$${product.price}</b></p>
+                <button id="product-${product.name}" class="btn btn-dark">Add to cart</button>  
+              </div>
+            </div>
+          </div>`;
+    }
+
+    function handleCartIconClick() {
+      document.getElementById('category-title').innerText = 'Order detail';
+      document.getElementById('cards').style.display = 'none';
+      document.getElementById('carrito').style.display = 'block';
+
+      let tableHtml = products.reduce((accum, actual) => accum + renderProductRow(actual), '');
+      document.getElementById('cart-items').innerHTML = tableHtml;
+    }
+
+    function renderProductRow(product) {
+      return `<tr><td><b>${product.index}</b></td><td>${product.count}</td>
+        <td>${product.name}</td><td>${product.price}</td><td>${product.price * product.count}
+          </td></tr>`;
+    }
+
+    async function getData() {
+      let response = await fetch('https://gist.githubusercontent.com/josejbocanegra/9a28c356416badb8f9173daf36d1460b/raw/5ea84b9d43ff494fcbf5c5186544a18b42812f09/restaurant.json');
+      return response.json();
+    }
+  </script>
 </body>
 
 </html>
